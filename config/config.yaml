@@ -1,0 +1,40 @@
+env:
+  version: v1
+  device: auto
+  seed: 0
+  timestamp: ${now:%Y%m%d_%H%M%S}
+
+pipeline:
+  use_tqdm: False
+  use_optuna_finetuning: True
+
+data:
+  batch_size: 8
+  shuffle: False
+  array_dim: 5
+  train_samples: 10_000
+  test_samples: 1_000
+
+model:
+  epochs: 10
+  use_bias: False
+  loss_name: MSELoss() # change here
+  optim_name: AdamW # change here
+  
+optim:
+  AdamW:
+    lr: 1e-4
+    weight_decay: 0.0
+  Adam:
+    lr: 1e-2
+    weight_decay: 0.0
+  SGD:
+    lr: 1e-2
+    weight_decay: 0.0
+
+paths:
+  root: /home/anmartinelli/Projects/Skeleton # change here
+  history_metrics: ${.root}/weights_tmp.joblib
+  aim: ${.root}/data
+  data: ${.root}/data
+  results: ${.root}/results

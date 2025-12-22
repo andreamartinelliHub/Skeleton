@@ -1,0 +1,28 @@
+
+paths:
+  root: /storage/DSIP/anmartinelli/pronostia_da
+
+model:
+  epochs: 100
+
+defaults:
+  - config
+  - _self_
+  - override hydra/launcher: submitit_slurm #joblib
+
+hydra:
+  launcher:
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+    timeout_min: 8000
+    nodes: 1
+    gpus_per_node: 1
+    mem_gb: 8 # mem_per_gpu
+    partition: l40s 
+    # partition: h100 
+    # gres: gpu:h100_1g.20gb:1 # gpu:h100_1g.20gb:1
+    array_parallelism: 5
+    stderr_to_stdout: True
+    name: ${hydra.job.name}
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+    # setup:
+    #   - conda activate TimeSeries  
