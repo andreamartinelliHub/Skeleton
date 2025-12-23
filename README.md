@@ -20,7 +20,7 @@ Get the SSH URL: Open the page of the project in gitlab.fbk.eu > Code button (to
 
 > ***Now Jack Skeleton is tracked as starting point.***
 
-## 🪶 [UV](https://docs.astral.sh/uv/getting-started/installation/)
+## 🌿 [UV](https://docs.astral.sh/uv/getting-started/installation/)
 
 uv is a lightweight tool for managing Python virtual environments and project dependencies. It allows you to create and activate isolated virtual environments easily. It is realy fast.
 ```
@@ -85,10 +85,8 @@ packages = ["src.package1", "src.package2"]
 In this way the `src` layout is perfect. Now you can import your different packages with `import package1` (and similar) in all files and notebooks.
 
 ## 🔀 [OmegaConf](https://omegaconf.readthedocs.io/en/2.3_branch/)
-OmegaConf is a YAML based hierarchical configuration system, with support for merging configurations from multiple sources.
-
-It unlocks variable interpolations, usage of resoovers, merging configurations and so on.
-
+OmegaConf is a YAML based hierarchical configuration system, with support for merging configurations from multiple sources.  
+It unlocks variable interpolations, usage of resolvers, merging configurations and so on.  
 In our case everything is set up via Hydra.
 
 ## 📢 [Hydra](https://hydra.cc/docs/intro/)
@@ -117,7 +115,20 @@ It’s useful to:
 
 ## 🗲 [Lightning]()
 
-## 🛣️ [Pathlib]()
+## 🛣️ [Pathlib](https://docs.python.org/3/library/pathlib.html)
+
+Pathlib is a modern Python module for handling filesystem paths, replacing os.path functions.  
+💡 Use `/` operator instead of `os.path.join()`.
+It's basic usage is:
+```
+from pathlib import Path
+
+root_path = Path("/your/path/projectRoot/")
+subfolder_path = root_path / 'subfolder'
+```
+The code becomes more readable and fluent when operations on paths are chained.  
+It handles platform-specific separators automatically.  
+
 
 ## 🪵 [Logging](https://docs.python.org/3/howto/logging.html#basic-logging-tutorial)
 
@@ -136,31 +147,3 @@ All settings of the logger are defined in `src/utils.py`: few changes and everyt
 # Backstage
 - [Git Installation](#git-installation-)
 - [Environment Creation](#-environment-creation)
-
-## 🛠️ Workflow of main.py
-> Handled with booleans in `config/default_config.yaml:settings.pipeline`
-1. Preprocessing of data: from `catchme_model_train/raw_dataset_preproccessing.py`
-2. Dataset creation: from `catchme_model_train/dataset_creation.py`
-3. Models training and testing
-
-> Training command (from ROOT/catchme_model): `python main.py --config-name=abacusConf -m settings.epochs=130 settings.patch_size=1500 settings.batch_size=-1`
-
-
-## 🌿 Environment Creation
-The cloned folder contains a file `pyproject.toml` containing all the dependencies.
-The creation of the environment is handled by uv: https://docs.astral.sh/uv/getting-started/
-
-After cloning the repo, you can find a git-tracked file called 'requirements.yml'.
-It contains all needed pip packages.
-- `uv venv .venv --python 3.8`
-- `uv init`
-- `uv sync`
- 
-***Updating the env***: uv add and uv remove
-
-***Activating the env***: source .venv/bin/activate
-
-***Remove files***
-- `git rm --cached filename`: remove the cached version, but keep it locally
-- `git rm filename`: completely removed 
-- `git ls-files`: check tracked files
