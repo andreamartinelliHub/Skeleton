@@ -111,9 +111,19 @@ It’s useful to:
 - Work well with experiment tracking (logs, checkpoints)
 - Encourage reproducible experiments 
 
-## 🕹️ [Optuna]()
+## 🕹️ [Optuna](https://optuna.readthedocs.io/en/stable/index.html)
 
-## 🗲 [Lightning]()
+## 🗲 [Lightning](https://lightning.ai/docs/pytorch/stable/levels/core_skills.html)
+
+Avoid device specifications
+Easy GPU/TPU support
+Scaling with GPUs
+handles optimizer, torch.no_grad() and detach()
+
+A Lightning training requires three things:
+- Lightning Module
+- Dataset
+- Lightning Trainer
 
 ## 🛣️ [Pathlib](https://docs.python.org/3/library/pathlib.html)
 
