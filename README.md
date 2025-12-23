@@ -12,12 +12,12 @@
 
 ## 📦 [GIT](https://git-scm.com/cheat-sheet)
 
-The repo is cloned. You have to link it with your remote git project: `git remote -v` print nothing, right?
+The repo is cloned. You have to link it with your remote git project: `git remote -v` print nothing, right?  
+Get the SSH URL: Open the page of the project in gitlab.fbk.eu > Code button (top right corner) > Copy URL  
+`$ git remote add origin URL` to link this folder to a remote git repository.  
+`$ git push -u origin master`: “Whenever I push or pull from now on, use origin/master as my default target”
 
-Get the SSH URL: Open the page of the project in gitlab.fbk.eu > Code button (top right corner) > Copy URL
-> git remote add origin URL
-
-The first push requires `git push -u origin master`.
+> ***Now Jack Skeleton is tracked as starting point.***
 
 ## [UV](https://docs.astral.sh/uv/getting-started/installation/)
 
