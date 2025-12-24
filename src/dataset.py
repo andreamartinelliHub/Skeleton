@@ -6,10 +6,6 @@ from src import utils
 
 logger = utils.get_logger(__name__)
 
-def load_data():
-    logger.info("Loading dataset...")
-    return [1, 2, 3]
-
 class Jack_Dataset(Dataset):
     def __init__(self, 
                  n_samples: int = 1_000, 
@@ -32,6 +28,11 @@ class Jack_Dataset(Dataset):
     # file paths
     # random seeds
 
-    def get_dataloader(self, batch_size, shuffle):
-        return DataLoader(self, batch_size, shuffle)
-    
+    def get_dataloader(self, batch_size, shuffle, num_workers):
+        return DataLoader(
+            self,
+            batch_size = batch_size,
+            shuffle = shuffle,
+            num_workers = num_workers,   # start here
+            # pin_memory=True
+        )

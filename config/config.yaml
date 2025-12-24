@@ -6,14 +6,17 @@ env:
 
 pipeline:
   use_tqdm: False
-  use_optuna_finetuning: True
+  use_optuna: True
+  
 
 data:
-  batch_size: 8
+  batch_size: 64
   shuffle: False
+  num_workers: 4
   array_dim: 5
-  train_samples: 10_000
-  test_samples: 1_000
+  train_samples: 100_000
+  val_samples: 10_000
+  test_samples: 10_000
 
 model:
   epochs: 10
@@ -31,6 +34,9 @@ optim:
   SGD:
     lr: 1e-2
     weight_decay: 0.0
+
+optuna:
+  trials: 3
 
 paths:
   root: /home/anmartinelli/Projects/Skeleton # change here

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import random
 import matplotlib.pyplot as plt
+# from optuna.integration import PyTorchLightningPruningCallback
 import seaborn as sns
 import logging
 
@@ -56,3 +57,47 @@ def plot_weights_heatmap(weights_array, figsize = (10,4)):
     plt.title("Linear Layer Weights Over Epochs")
     plt.tight_layout()
     plt.show()
+
+# ---------------------------
+# Optuna objective
+# ---------------------------
+def objective(trial, conf, module, trainer, dl):
+    # Suggest hyperparameters
+
+    lr = trial.suggest_float("lr", 1e-5, 1e-1, log=True)
+    weight_decay = trial.suggest_float("weight_decay", 1e-6, 1e-2, log=True)
+
+    # Update conf dynamically
+    conf.optim[conf.model.optim_name].lr = lr
+    conf.optim[conf.model.optim_name].weight_decay = weight_decay
+
+    trainer.fit(module, dl)
+    # Lightning logs metrics internally
+    loss = trainer.callback_metrics["train_loss"].item()
+    return loss
+
+# --- PHASE 1: Optuna Optimization ---
+def objective(trial, module, trainer, dataloader):
+    # 1. Hyperparameters to tune
+    params = {
+        "lr": trial.suggest_float("lr", 1e-4, 1e-2, log=True),
+        "weight_decay": trial.suggest_float("weight_decay", 1e-6, 1e-2, log=True)
+    }
+    
+    # 2. Setup (Note: Re-instantiating loaders per trial is safer for batch_size changes)
+    # train_loader, val_loader, _ = get_loaders(params['batch_size'])
+    
+    # 4. Pruning Callback (stops bad trials early)
+    # pruner = PyTorchLightningPruningCallback(trial, monitor="val_acc")
+    
+    # trainer = pl.Trainer(
+    #     max_epochs=3, # Small number for tuning, but >1 allows pruning to work
+    #     accelerator="auto",
+    #     enable_checkpointing=False,
+    #     logger=False,
+    #     callbacks=[pruner]
+    # )
+    
+    trainer.fit(module, dataloader)
+    
+    return trainer.callback_metrics["val_acc"].item()

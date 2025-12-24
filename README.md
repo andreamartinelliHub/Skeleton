@@ -114,6 +114,9 @@ It’s useful to:
 ## 🕹️ [Optuna](https://optuna.readthedocs.io/en/stable/index.html)
 
 ## 🗲 [Lightning](https://lightning.ai/docs/pytorch/stable/levels/core_skills.html)
+The power of Lightning comes when the training loop gets complicated as you add validation/test splits, schedulers, distributed training and all the latest SOTA techniques.
+
+With Lightning, you can add mix all these techniques together without needing to rewrite a new loop every time.
 
 Avoid device specifications
 Easy GPU/TPU support

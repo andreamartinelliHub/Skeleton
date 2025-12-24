@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Dict
+import pytorch_lightning as pl
 from tqdm import trange
 
 from src import utils
@@ -13,6 +14,7 @@ class Jack_Model(nn.Module):
                  use_bias: bool):
         super().__init__()
         self.linear = nn.Linear(input_dim, 1, bias=use_bias)
+        
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(x)
@@ -24,7 +26,6 @@ def get_optimizer(model, optim_name, lr):
 def get_loss_fn(loss_name):
     loss_fn = eval(f'nn.{loss_name}')
     return loss_fn
-
 
 # train.py should answer one question only:
 # “Given a model and data, how do we train it?”
@@ -101,3 +102,42 @@ def evaluate(
     return {"loss": avg_loss}
 
 
+# ---------------------------
+# Lightning module wrapper
+# ---------------------------
+class JackModule(pl.LightningModule):
+    def __init__(self, backbone, conf):
+        super().__init__()
+        self.conf = conf
+        self.net = backbone(conf.data.array_dim, conf.model.use_bias)
+        self.loss_fn = get_loss_fn(conf.model.loss_name)
+
+    def forward(self, x):
+        return self.net(x)
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y)
+        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        return loss
+    
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y) # change loss if needed
+        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y) # change loss if needed
+        self.log("train_loss", loss, on_step=False, on_epoch=True)
+        return loss
+
+    def configure_optimizers(self):
+        optim_name = self.conf.model.optim_name
+        optimizer = eval(f'torch.optim.{optim_name}')
+        return optimizer(self.parameters(), lr=self.conf.optim[optim_name].lr)
+    
