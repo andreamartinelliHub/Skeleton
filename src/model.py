@@ -3,6 +3,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Dict
 import pytorch_lightning as pl
+from lightning.pytorch.callbacks import Callback
 from tqdm import trange
 
 from src import utils
@@ -74,7 +75,6 @@ def train(
 
     return weights_evolution
 
-
 @torch.no_grad()
 def evaluate(
     model: nn.Module,
@@ -101,7 +101,6 @@ def evaluate(
 
     return {"loss": avg_loss}
 
-
 # ---------------------------
 # Lightning module wrapper
 # ---------------------------
@@ -110,29 +109,19 @@ class JackModule(pl.LightningModule):
         super().__init__()
         self.conf = conf
         self.net = backbone(conf.data.array_dim, conf.model.use_bias)
-        self.loss_fn = get_loss_fn(conf.model.loss_name)
+        # to enable intermediate input-ouput sizes
+        self.example_input_array = torch.Tensor(10, conf.data.array_dim)
+        # in this case train loss == test_loss
+        self.loss_fn = get_loss_fn(conf.model.loss_name) 
 
     def forward(self, x):
         return self.net(x)
 
     def training_step(self, batch, batch_idx):
         x, y = batch
+        # if neededm, adjust shape of x or y here
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("train_loss", loss, on_step=False, on_epoch=True)
-        return loss
-    
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = self.loss_fn(y_hat, y) # change loss if needed
-        self.log("train_loss", loss, on_step=False, on_epoch=True)
-        return loss
-
-    def test_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        loss = self.loss_fn(y_hat, y) # change loss if needed
         self.log("train_loss", loss, on_step=False, on_epoch=True)
         return loss
 
@@ -141,3 +130,36 @@ class JackModule(pl.LightningModule):
         optimizer = eval(f'torch.optim.{optim_name}')
         return optimizer(self.parameters(), lr=self.conf.optim[optim_name].lr)
     
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y) # change loss if needed
+        self.log("val_loss", loss, on_step=False, on_epoch=True)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y) # change loss if needed
+        self.log("test_loss", loss, on_step=False, on_epoch=True)
+    
+
+# ---------------------------
+# Lightning Callbacks: 
+# Callbacks allow you to add arbitrary self-contained programs to your training
+# ---------------------------
+class WeightsSaver(Callback):
+    def __init__(self, net_name="net"):
+        self.net_name = net_name
+        self.epoch_weights = {}
+    
+    def on_train_epoch_end(self, trainer, pl_module):
+        epoch = trainer.current_epoch
+        net = getattr(pl_module, self.net_name)
+        weights = net.linear.weight.detach().cpu()  # Shape: [out_features, in_features]
+        # breakpoint()
+        self.epoch_weights[epoch] = weights.clone().squeeze()
+        # logger.info(f"Epoch {epoch}: stored shape {weights.shape}, sample {weights[0][:3]}...")
+
+
+        

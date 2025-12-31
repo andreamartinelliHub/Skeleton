@@ -44,7 +44,7 @@ def get_logger(name: str = __name__):
 def plot_weights_heatmap(weights_array, figsize = (10,4)):
     plt.figure(figsize = figsize)
     sns.heatmap(
-        weights_array,
+        np.array(weights_array),
         cmap="RdBu",
         annot=True,          # <--- this shows the value in each cell
         fmt=".2f",           # <--- format numbers

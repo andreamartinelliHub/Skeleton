@@ -10,6 +10,8 @@ wheels/
 data/
 imgs/
 outputs/
+checkpoints/
+lightning_logs/
 
 # Virtual environments
 .venv

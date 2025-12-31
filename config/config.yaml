@@ -5,15 +5,17 @@ env:
   timestamp: ${now:%Y%m%d_%H%M%S}
 
 pipeline:
+  show_full_conf: False
+  fast_debug_batch: False # False or 1,2,...
   use_tqdm: False
-  use_optuna: True
+  use_optuna: False
   
 
 data:
   batch_size: 64
   shuffle: False
   num_workers: 4
-  array_dim: 5
+  array_dim: 6
   train_samples: 100_000
   val_samples: 10_000
   test_samples: 10_000
@@ -26,7 +28,7 @@ model:
   
 optim:
   AdamW:
-    lr: 1e-4
+    lr: 5e-5
     weight_decay: 0.0
   Adam:
     lr: 1e-2
@@ -40,7 +42,7 @@ optuna:
 
 paths:
   root: /home/anmartinelli/Projects/Skeleton # change here
-  history_metrics: ${.root}/weights_tmp.joblib
+  glob_weights: ${.root}/weights_tmp.joblib
   aim: ${.root}/data
   data: ${.root}/data
   results: ${.root}/results

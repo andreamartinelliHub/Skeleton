@@ -29,10 +29,12 @@ class Jack_Dataset(Dataset):
     # random seeds
 
     def get_dataloader(self, batch_size, shuffle, num_workers):
-        return DataLoader(
+        dataloader = DataLoader(
             self,
             batch_size = batch_size,
             shuffle = shuffle,
             num_workers = num_workers,   # start here
             # pin_memory=True
         )
+        logger.info(f"Num of batches: {len(dataloader)}")
+        return dataloader
