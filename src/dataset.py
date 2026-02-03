@@ -2,9 +2,8 @@ from torch.utils.data import Dataset, DataLoader
 import torch
 from typing import Tuple
 
-from src import utils
-
-logger = utils.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 class Jack_Dataset(Dataset):
     def __init__(self, 
@@ -38,3 +37,21 @@ class Jack_Dataset(Dataset):
         )
         logger.info(f"Num of batches: {len(dataloader)}")
         return dataloader
+    
+def get_dataloaders(conf):
+    train_ds = Jack_Dataset(
+        n_samples=conf.data.train_samples, 
+        shape=conf.data.array_dim)
+    train_dl = train_ds.get_dataloader(conf.data.batch_size, conf.data.shuffle, conf.data.num_workers)
+    
+    val_ds = Jack_Dataset(
+        n_samples=conf.data.val_samples, 
+        shape=conf.data.array_dim)
+    val_dl = val_ds.get_dataloader(conf.data.batch_size, conf.data.shuffle, conf.data.num_workers)
+
+    test_ds = Jack_Dataset(
+        n_samples=conf.data.test_samples, 
+        shape=conf.data.array_dim)
+    test_dl = test_ds.get_dataloader(conf.data.batch_size, conf.data.shuffle, conf.data.num_workers)
+
+    return train_dl, val_dl, test_dl

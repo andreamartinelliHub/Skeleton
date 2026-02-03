@@ -6,8 +6,8 @@ import pytorch_lightning as pl
 from lightning.pytorch.callbacks import Callback
 from tqdm import trange
 
-from src import utils
-logger = utils.get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 class Jack_Model(nn.Module):
     def __init__(self, 
@@ -112,7 +112,9 @@ class JackModule(pl.LightningModule):
         # to enable intermediate input-ouput sizes
         self.example_input_array = torch.Tensor(10, conf.data.array_dim)
         # in this case train loss == test_loss
-        self.loss_fn = get_loss_fn(conf.model.loss_name) 
+        self.loss_fn = get_loss_fn(conf.model.loss_name)
+        self.optim_name = conf.model.optim_name
+        self.lr = conf.optim[self.optim_name].lr
 
     def forward(self, x):
         return self.net(x)
@@ -126,9 +128,8 @@ class JackModule(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optim_name = self.conf.model.optim_name
-        optimizer = eval(f'torch.optim.{optim_name}')
-        return optimizer(self.parameters(), lr=self.conf.optim[optim_name].lr)
+        optimizer = eval(f'torch.optim.{self.optim_name}')
+        return optimizer(self.parameters(), lr=self.lr)
     
     def validation_step(self, batch, batch_idx):
         x, y = batch
@@ -149,17 +150,16 @@ class JackModule(pl.LightningModule):
 # Callbacks allow you to add arbitrary self-contained programs to your training
 # ---------------------------
 class WeightsSaver(Callback):
-    def __init__(self, net_name="net"):
+    def __init__(self, weights_history_path, net_name="net"):
         self.net_name = net_name
         self.epoch_weights = {}
+        self.weights_history_path = weights_history_path
     
     def on_train_epoch_end(self, trainer, pl_module):
         epoch = trainer.current_epoch
-        net = getattr(pl_module, self.net_name)
-        weights = net.linear.weight.detach().cpu()  # Shape: [out_features, in_features]
+        net = getattr(pl_module, self.net_name) # find submodule dinamically
+        weights = net.linear.weight.detach().cpu().clone()  # Shape: [out_features, in_features]
         # breakpoint()
         self.epoch_weights[epoch] = weights.clone().squeeze()
         # logger.info(f"Epoch {epoch}: stored shape {weights.shape}, sample {weights[0][:3]}...")
-
-
-        
+    

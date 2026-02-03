@@ -8,7 +8,7 @@ pipeline:
   show_full_conf: False
   fast_debug_batch: False # False or 1,2,...
   use_tqdm: False
-  use_optuna: False
+  use_optuna: True
   
 
 data:
@@ -43,6 +43,26 @@ optuna:
 paths:
   root: /home/anmartinelli/Projects/Skeleton # change here
   glob_weights: ${.root}/weights_tmp.joblib
+  weights_history: ${.root}/weights_history.pt
   aim: ${.root}/data
   data: ${.root}/data
   results: ${.root}/results
+
+hydra:
+  job_logging: # customizing the logger
+    formatters:
+      custom_file_format:
+        format: "%(asctime)s [%(name)s] [%(funcName)s()] %(message)s"
+        datefmt: "%H:%M:%S"
+      custom_console_format:
+        format: "%(asctime)s [%(levelname)s] [%(name)s] [%(funcName)s()] %(message)s"
+        datefmt: "%Y-%m-%d %H:%M:%S"
+    handlers: # where printing
+      file:
+        class: logging.FileHandler
+        formatter: custom_file_format
+        filename: ${hydra.runtime.output_dir}/${hydra.job.name}.log
+      console:
+        class: logging.StreamHandler
+        formatter: custom_console_format
+        stream: ext://sys.stdout
